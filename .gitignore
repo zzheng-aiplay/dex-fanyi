@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated views. `tools/render_html.py` rebuilds graph.html from
+# `dexcli visualize --json`, so a committed copy would only ever be stale.
+graph.html
+
+# Scratch projects built by tools/make_sandbox.py, and any run state under them
+.run/
+pipeline/run/

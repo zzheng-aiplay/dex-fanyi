@@ -1,0 +1,20 @@
+[project]
+name = "dex-fanyi"
+version = "0.1.0"
+description = "Durable classical-Chinese translation pipeline on Dex"
+requires-python = ">=3.11"
+dependencies = [
+    "dex-python-sdk==0.2.5",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2,<9",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

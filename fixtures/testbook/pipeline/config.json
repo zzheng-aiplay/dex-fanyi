@@ -1,0 +1,67 @@
+{
+ "_README": "Fixture project for dex-fanyi's end-to-end test. Written from scratch for this repo. Every policy string below is a PLACEHOLDER — deliberately generic, one plain line where a real project writes a page. They exist so the schema the prompts read is satisfied and a test run has something to pass through. They are not anyone's editorial policy, and a real project replaces all of them. The cast names are placeholders too, not the source work's characters.",
+ "source_work": "Romance of the Three Kingdoms",
+ "original_author": "Luo Guanzhong",
+ "project": {
+  "slug": "testbook",
+  "root": "FIXTURE_ROOT",
+  "_root_note": "Rewritten to an absolute path by tools/make_sandbox.py, so the committed fixture holds no machine-specific path.",
+  "source_pattern": "source/chapters/hui_{n:03d}.txt",
+  "volumes_key": "books",
+  "unit_range_key": "hui",
+  "unit_singular": "chapter",
+  "vault_book_dir": "FIXTURE_ROOT/vault"
+ },
+ "books": {
+  "1": {
+   "hui": [
+    1,
+    20
+   ],
+   "title": "Test Volume One",
+   "subtitle": "A Fixture",
+   "status": "FIXTURE"
+  }
+ },
+ "voice": {
+  "target": "PLACEHOLDER: plain modern English narrative prose.",
+  "_pass2_fluency": "PLACEHOLDER: rewrite for readability without changing meaning; add nothing the source does not contain.",
+  "verbs": "PLACEHOLDER: prefer the specific verb.",
+  "em_dashes": "PLACEHOLDER: no em-dashes.",
+  "always_cut_translationese": "PLACEHOLDER: see pipeline/build_pass2.py for the list the gate actually enforces.",
+  "core_principle": "PLACEHOLDER: faithful to the source, natural in English."
+ },
+ "structure": {
+  "tier_handling": "PLACEHOLDER: each beat is assigned FULL or BRIEF. FULL renders the beat completely and keeps spoken lines as quoted speech. BRIEF compresses it as far as the material allows, down to returning no prose at all for a beat the chapter does not need.",
+  "verbatim_policy": "PLACEHOLDER: a beat earns FULL when it turns the plot or its speech carries the scene.",
+  "units": "PLACEHOLDER: convert Chinese units to American ones by sense, not 1:1 by name, and never leave a bare 尺/里/丈 in the English.",
+  "_units_note": "Kept because it is load-bearing rather than stylistic: with no units block, agents relabel measurements 1:1 and inflate them by roughly a third."
+ },
+ "cast_tiers": {
+  "floor_rule": "PLACEHOLDER: a beat centred on a major figure may not be compressed below FULL; a beat centred on a recurring figure may be BRIEF but must keep the figure named.",
+  "tier1": [
+   "Alpha",
+   "Beta",
+   "Gamma"
+  ],
+  "tier2": [
+   "Delta",
+   "Epsilon",
+   "Zeta"
+  ]
+ },
+ "naming": {
+  "courtesy_names": "PLACEHOLDER: use given names in pinyin; gloss a courtesy name once if the source makes a point of it."
+ },
+ "review_gates": {
+  "GATE_1": "Uncertain tier calls reviewed before anything is translated.",
+  "GATE_2": "QA scorecard read before anything reaches the manuscript.",
+  "GATE_3": "Proof signed off before the volume is called finished."
+ },
+ "quality_bar": {
+  "_note": "Thresholds the QA gate reads. These are the reference defaults, not a tuned bar.",
+  "access_floor": 4.0,
+  "access_lift": 0.8
+ },
+ "_source_note": "source_work and original_author describe the public-domain text shipped in source/chapters/ so prompts can name it. They are not a claim about anyone's edition."
+}
