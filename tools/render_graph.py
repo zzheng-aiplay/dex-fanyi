@@ -212,6 +212,11 @@ def main() -> int:
     parser.add_argument("--python", default="/usr/local/bin/python3")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--write")
+    parser.add_argument(
+        "--fdg-dir",
+        help="write one Flow Definition Graph JSON per Flow into this directory, for "
+        "`dexcli dev --flow-rendering-dir` to load them all into one /rendering page",
+    )
     args = parser.parse_args()
 
     graphs = []
@@ -230,6 +235,25 @@ def main() -> int:
         if not graph["valid"]:
             return 1
         graphs.append(graph)
+
+    if args.fdg_dir:
+        # Dex Web's Flow Rendering page loads a whole directory of these, which is how
+        # you get a parent Flow and its SubFlows side by side — `dexcli visualize` alone
+        # takes one source file at a time.
+        target = Path(args.fdg_dir).expanduser()
+        target.mkdir(parents=True, exist_ok=True)
+        for graph in graphs:
+            path = target / f"{graph['flow']['name']}.json"
+            path.write_text(json.dumps(graph, ensure_ascii=False, indent=1), encoding="utf-8")
+            print(f"  wrote {path}", file=sys.stderr)
+        print(
+            f"\nload them all with:\n"
+            f"  dexcli dev --flow-rendering-dir {target}\n"
+            f"then open http://127.0.0.1:8802/rendering\n"
+            f"(the snapshot is taken at startup, so restart Dex after regenerating)",
+            file=sys.stderr,
+        )
+        return 0
 
     if args.check:
         return 0
