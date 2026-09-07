@@ -86,7 +86,10 @@ progress = Stream("pp-progress", str, 1 << 16)
 
 
 class Pass1Step(Step[ChapterJob]):
-    """STEP 1: transcreate each beat from the Chinese, applying its tier."""
+    """First English draft.
+
+    STEP 1: transcreate each beat from the Chinese, applying its tier.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -168,7 +171,10 @@ class Pass1Step(Step[ChapterJob]):
 
 
 class DialogueRepairStep(Step[ChapterJob]):
-    """STEP 1b: re-render any beat that flattened speech into narration."""
+    """Put the speech back.
+
+    STEP 1b: re-render any beat that flattened speech into narration.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -236,7 +242,10 @@ class DialogueRepairStep(Step[ChapterJob]):
 
 
 class Pass2Step(Step[ChapterJob]):
-    """STEP 2: fluency rewrite into the shipping voice."""
+    """Rewrite for readability.
+
+    STEP 2: fluency rewrite into the shipping voice.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -276,7 +285,10 @@ class Pass2Step(Step[ChapterJob]):
 
 
 class AuditStep(Step[ChapterJob]):
-    """STEP 3a: three adversarial lenses — calque, archaism, fidelity."""
+    """Three readers attack it.
+
+    STEP 3a: three adversarial lenses — calque, archaism, fidelity.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -324,7 +336,10 @@ class AuditStep(Step[ChapterJob]):
 
 
 class RemediateStep(Step[ChapterJob]):
-    """STEP 3b: fix the flagged spans, then re-audit with the first two lenses."""
+    """Fix what they flagged.
+
+    STEP 3b: fix the flagged spans, then re-audit with the first two lenses.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -389,7 +404,10 @@ class RemediateStep(Step[ChapterJob]):
 
 
 class FinalizeStep(Step[ChapterJob]):
-    """STEP 3c: accessibility-lift gate, deterministic ship gate, targeted fix."""
+    """Score it and scan it.
+
+    STEP 3c: accessibility-lift gate, deterministic ship gate, targeted fix.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -530,7 +548,10 @@ class FinalizeStep(Step[ChapterJob]):
 
 
 class ProduceFailedStep(Step[ChapterJob]):
-    """Exhausted retries end the chapter as a failure, recording how far it got."""
+    """Record a chapter that gave up.
+
+    Exhausted retries end the chapter as a failure, recording how far it got.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config

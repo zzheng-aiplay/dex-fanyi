@@ -1,0 +1,8 @@
+{
+  "steps": {
+    "PlanChapterStep": {
+      "inputLabel": "one chapter's Chinese source",
+      "outputLabel": "that chapter's beat list"
+    }
+  }
+}

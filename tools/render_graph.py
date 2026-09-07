@@ -17,6 +17,7 @@ Interactive rendering is `dexcli visualize <file>` with no flags.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import subprocess
 import sys
@@ -50,7 +51,71 @@ def fdg(path: Path, interpreter: str) -> dict:
     )
     if result.returncode != 0:
         raise RuntimeError(f"dexcli visualize {path.name} failed:\n{result.stderr}")
-    return json.loads(result.stdout)
+    graph = json.loads(result.stdout)
+    label_steps(graph, path)
+    return graph
+
+
+def docstring_titles(source: Path) -> dict[str, str]:
+    """Each Step class's docstring summary, keyed by class name.
+
+    The summary is the card's title, so it lives next to the code it names and cannot
+    be orphaned by a rename. Parsed, never imported — the same constraint the analyser
+    works under.
+    """
+    titles: dict[str, str] = {}
+    for node in ast.parse(source.read_text()).body:
+        if not isinstance(node, ast.ClassDef):
+            continue
+        text = ast.get_docstring(node, clean=True)
+        if not text:
+            continue
+        summary = text.strip().split("\n\n", 1)[0].replace("\n", " ").strip()
+        # PEP 257 wants the period; a title reads better without it.
+        titles[node.name] = summary[:-1] if summary.endswith(".") else summary
+    return titles
+
+
+def sidecar_labels(source: Path) -> dict[str, dict]:
+    """The `<stem>.step-labels.json` beside a Flow, or nothing if absent.
+
+    Holds only what a docstring should not claim: the business input and output, and a
+    plain-English sentence for what the Step waits on.
+    """
+    path = source.with_suffix("").with_suffix(".step-labels.json")
+    if not path.exists():
+        path = source.parent / f"{source.stem}.step-labels.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text()).get("steps", {})
+
+
+def label_steps(graph: dict, source: Path) -> None:
+    """Merge authored labels into Step-node metadata, the way the renderer reads them.
+
+    Deliberately a prototype of the merge that belongs in `flowviz.Analyze`: when that
+    lands, this function goes and the label files move across untouched.
+    """
+    titles = docstring_titles(source)
+    labels = sidecar_labels(source)
+    step_names = set()
+    for node in graph["nodes"]:
+        if node["kind"] != "step":
+            continue
+        step_names.add(node["name"])
+        authored = dict(labels.get(node["name"], {}))
+        title = authored.pop("displayName", None) or titles.get(node["name"])
+        metadata = node.setdefault("metadata", {})
+        if title:
+            metadata["displayName"] = title
+        metadata.update(authored)
+        if not metadata:
+            node.pop("metadata")
+    for name in sorted(set(labels) - step_names):
+        print(
+            f"  warning: {source.name} labels name {name}, which is not a Step",
+            file=sys.stderr,
+        )
 
 
 def short(step_id: str) -> str:

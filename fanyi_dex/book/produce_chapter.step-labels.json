@@ -1,0 +1,28 @@
+{
+  "steps": {
+    "Pass1Step": {
+      "inputLabel": "the chapter's instruction sheet",
+      "outputLabel": "faithful English, beat by beat"
+    },
+    "DialogueRepairStep": {
+      "inputLabel": "beats where dialogue got flattened",
+      "outputLabel": "quoted speech restored"
+    },
+    "Pass2Step": {
+      "inputLabel": "the faithful draft",
+      "outputLabel": "same meaning, better English"
+    },
+    "AuditStep": {
+      "inputLabel": "the rewritten chapter",
+      "outputLabel": "a list of flagged lines"
+    },
+    "RemediateStep": {
+      "inputLabel": "the flagged lines",
+      "outputLabel": "only those lines changed"
+    },
+    "FinalizeStep": {
+      "inputLabel": "the corrected chapter",
+      "outputLabel": "a readability score and a clean scan"
+    }
+  }
+}

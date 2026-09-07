@@ -167,7 +167,10 @@ def _bookkeeping() -> StepOptions:
 
 
 class InitStep(Step[StageRef]):
-    """Freeze the run plan, seed one record per chapter, and refuse bad input early."""
+    """Lock the volume plan.
+
+    Freeze the run plan, seed one record per chapter, and refuse bad input early.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -249,7 +252,10 @@ class InitStep(Step[StageRef]):
 
 
 class CurateWaveStep(Step[StageRef]):
-    """Awaits one bounded batch of chapter beat-plan SubFlows."""
+    """Break each chapter into beats.
+
+    Awaits one bounded batch of chapter beat-plan SubFlows.
+    """
 
     def __init__(self, config: Config, curate: CurateChapterFlow) -> None:
         self.config = config
@@ -345,7 +351,10 @@ class CurateWaveStep(Step[StageRef]):
 
 
 class DirectorGate(Step[StageRef]):
-    """GATE 1: the uncertain tier calls are reviewed before anything is translated."""
+    """Rule on borderline beats.
+
+    GATE 1: the uncertain tier calls are reviewed before anything is translated.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -417,7 +426,9 @@ class DirectorGate(Step[StageRef]):
 
 
 class ApproveItemsStep(Step[StageRef]):
-    """Turns approved beat plans into the items the produce pass consumes.
+    """Issue chapter work orders.
+
+    Turns approved beat plans into the items the produce pass consumes.
 
     This is the handoff v1 left to a human: there, the beat-plan Flow completed and
     somebody had to find the right `cutlists/*.json` and pass it to `--items`, with
@@ -492,7 +503,10 @@ class ApproveItemsStep(Step[StageRef]):
 
 
 class ProduceWaveStep(Step[StageRef]):
-    """Awaits one bounded batch of chapter transcreation SubFlows."""
+    """Translate and audit each chapter.
+
+    Awaits one bounded batch of chapter transcreation SubFlows.
+    """
 
     def __init__(self, config: Config, produce: ProduceChapterFlow) -> None:
         self.config = config
@@ -584,7 +598,10 @@ class ProduceWaveStep(Step[StageRef]):
 
 
 class QaGate(Step[StageRef]):
-    """GATE 2: the QA signals are read before anything reaches the vault."""
+    """Approve the quality scorecard.
+
+    GATE 2: the QA signals are read before anything reaches the vault.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -642,7 +659,9 @@ class QaGate(Step[StageRef]):
 
 
 class HarvestStep(Step[StageRef]):
-    """Writes the finished chapters into the vault, after an independent backup.
+    """File chapters into the vault.
+
+    Writes the finished chapters into the vault, after an independent backup.
 
     v1 refused to do this at all — it printed the command and parked, because the
     write reaches the Obsidian vault. Here it runs, but only after copying the
@@ -714,7 +733,10 @@ class HarvestStep(Step[StageRef]):
 
 
 class AssembleStep(Step[StageRef]):
-    """Runs the project's own assemble.py: master markdown, .docx, .epub."""
+    """Bind the manuscript and ebook.
+
+    Runs the project's own assemble.py: master markdown, .docx, .epub.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -771,7 +793,10 @@ class AssembleStep(Step[StageRef]):
 
 
 class PrintStep(Step[StageRef]):
-    """Runs assemble_print.py: the 6x9 KDP interior PDF, preflight included."""
+    """Typeset the print interior.
+
+    Runs assemble_print.py: the 6x9 KDP interior PDF, preflight included.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -836,7 +861,10 @@ class PrintStep(Step[StageRef]):
 
 
 class QualityStep(Step[StageRef]):
-    """Validates the epub. The print preflight already ran inside assemble_print.py."""
+    """Validate the ebook file.
+
+    Validates the epub. The print preflight already ran inside assemble_print.py.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -873,7 +901,10 @@ class QualityStep(Step[StageRef]):
 
 
 class ProofGate(Step[StageRef]):
-    """GATE 3: the human reads the proof before the volume is called finished."""
+    """Sign off the proof.
+
+    GATE 3: the human reads the proof before the volume is called finished.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -956,7 +987,9 @@ class ProofGate(Step[StageRef]):
 
 
 class RecoveryGate(Step[StageRef]):
-    """Every stage's exhausted-retry target: park, record, wait for a decision.
+    """Park the volume for repair.
+
+    Every stage's exhausted-retry target: park, record, wait for a decision.
 
     v1 gave each failure its own ad hoc diversion (a beat-plan failure landed on the
     director gate with a note; a harvest failure landed there too), so 'the volume is

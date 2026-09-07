@@ -52,7 +52,10 @@ progress = Stream("cc-progress", str, 1 << 16)
 
 
 class PlanChapterStep(Step[ChapterJob]):
-    """The one expensive call: source Chinese in, beat plan out."""
+    """Break one chapter into beats.
+
+    The one expensive call: source Chinese in, beat plan out.
+    """
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -131,7 +134,9 @@ class PlanChapterStep(Step[ChapterJob]):
 
 
 class PlanFailedStep(Step[ChapterJob]):
-    """Exhausted retries end the chapter as a failure, not as a quiet success.
+    """Record a chapter that gave up.
+
+    Exhausted retries end the chapter as a failure, not as a quiet success.
 
     The parent's batch wait is satisfied by *closure*, so failing here cannot
     stall the volume — which is why v1's ChapterFailedStep (whose only job was to

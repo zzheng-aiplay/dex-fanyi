@@ -1,0 +1,58 @@
+{
+  "steps": {
+    "InitStep": {
+      "inputLabel": "project settings + chapter range",
+      "outputLabel": "locked plan, one slot per chapter"
+    },
+    "CurateWaveStep": {
+      "inputLabel": "chapter list + Chinese source",
+      "outputLabel": "beat plan per chapter + coverage",
+      "waitLabel": "Waits for every chapter's beat-splitting run to finish."
+    },
+    "DirectorGate": {
+      "inputLabel": "beats flagged as uncertain",
+      "outputLabel": "human approval + tier overrides",
+      "waitLabel": "Stops here. The director has to rule on the flagged beats before anything is translated; it nudges once a day until they do."
+    },
+    "ApproveItemsStep": {
+      "inputLabel": "approved beat plans + overrides",
+      "outputLabel": "one work-order file per chapter"
+    },
+    "ProduceWaveStep": {
+      "inputLabel": "chapter work orders",
+      "outputLabel": "finished chapter + QA signals",
+      "waitLabel": "Waits for every chapter's translation run to finish."
+    },
+    "QaGate": {
+      "inputLabel": "per-chapter QA signals + cost",
+      "outputLabel": "human approval to write the vault",
+      "waitLabel": "Stops here. Someone has to accept the quality scorecard before these chapters may enter the book."
+    },
+    "HarvestStep": {
+      "inputLabel": "finished chapter records",
+      "outputLabel": "chapter markdown in the book folder + count"
+    },
+    "AssembleStep": {
+      "inputLabel": "filed chapters + front/back matter",
+      "outputLabel": "master markdown, .docx, .epub"
+    },
+    "PrintStep": {
+      "inputLabel": "the master markdown",
+      "outputLabel": "6x9 interior PDF + page count + preflight verdict"
+    },
+    "QualityStep": {
+      "inputLabel": "the .epub",
+      "outputLabel": "epubcheck verdict"
+    },
+    "ProofGate": {
+      "inputLabel": "every artifact produced so far",
+      "outputLabel": "signed-off, completed volume",
+      "waitLabel": "Stops here. Someone has to sign off the proof; it refuses to even ask until the chapters, manuscript and interior all exist."
+    },
+    "RecoveryGate": {
+      "inputLabel": "which stage failed, and why",
+      "outputLabel": "re-entry at the stage an operator names",
+      "waitLabel": "Stops here. The volume is parked until someone says where to restart it."
+    }
+  }
+}
