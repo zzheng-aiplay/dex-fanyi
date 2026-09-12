@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Durable classical-Chinese translation pipeline on Dex"
 requires-python = ">=3.11"
 dependencies = [
-    "dex-python-sdk==0.2.5",
+    "dex-python-sdk==0.6.0",
 ]
 
 [dependency-groups]

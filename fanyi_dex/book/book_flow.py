@@ -1160,9 +1160,19 @@ class BookFlow(Flow[StageRef]):
             progress,
         )
 
-    @rpc
+    @rpc(load_attribute_maps=(chapters,))
     def snapshot(self, context: Context) -> RPCResult[Snapshot]:
-        """One cohesive read model, so a UI or CLI needs exactly one request."""
+        """One cohesive read model, so a UI or CLI needs exactly one request.
+
+        ``load_attribute_maps`` is the 0.6.0 way to say WHICH AttributeMap instances a handler needs.
+        Before it existed the handler simply called ``chapters.get_all_instance_keys`` and then
+        ``chapters.get`` per key and the loading was implicit; declaring it lets the runtime fetch the
+        map's instances up front instead of discovering the need mid-handler.
+
+        Declared here and NOT on the two ``status`` RPCs in ``flow.py`` and ``pass1_flow.py``, because
+        those read plain Attributes only — checked by walking their call graphs, not by eye. ``chapters``
+        is the whole of this handler's map surface: directly, and through ``_recount``.
+        """
         records = []
         for instance in chapters.get_all_instance_keys(context):
             record = chapters.get(context, instance)
