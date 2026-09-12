@@ -19,6 +19,7 @@ import time
 from datetime import timedelta
 
 from dex import (
+    AsyncContext,
     Attribute,
     Channel,
     Context,
@@ -44,7 +45,7 @@ class GateStep(Step[str]):
         print(f"  [gate] wait_for at {time.time():.3f}", flush=True)
         return Wait.any_of(chan.for_one(), Timer.by_duration(timedelta(seconds=6)))
 
-    async def execute(self, context: Context, input: str) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: str) -> StepDecision:  # type: ignore[override]
         verdict = (
             f"has_timer_fired={context.has_timer_fired()} "
             f"results={list(chan.results(context))} "

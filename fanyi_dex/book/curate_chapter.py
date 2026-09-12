@@ -16,6 +16,7 @@ import json
 from datetime import timedelta
 
 from dex import (
+    AsyncContext,
     Attribute,
     AttributeIndex,
     Context,
@@ -75,7 +76,7 @@ class PlanChapterStep(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(PlanFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "planning")
         project = Project(input.config_path)
         zh = project.read_source(input.hui)
@@ -155,7 +156,7 @@ class PlanFailedStep(Step[ChapterJob]):
             )
         )
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "failed")
         reason = f"beat plan for hui {input.hui} exhausted its retries"
         detail.set(context, reason)

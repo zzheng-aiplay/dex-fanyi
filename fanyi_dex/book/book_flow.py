@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from dex import (
+    AsyncContext,
     Attribute,
     AttributeIndex,
     AttributeMap,
@@ -178,7 +179,7 @@ class InitStep(Step[StageRef]):
     def get_step_options(self) -> StepOptions:
         return _bookkeeping().on_execute_failure_proceed_to(RecoveryGate)
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, INIT)
         project = Project(input.config_path)
         project.require_beatplan_support()
@@ -289,7 +290,7 @@ class CurateWaveStep(Step[StageRef]):
             ]
         )
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, CURATING)
         batch = _batch(context, input)
         for index, hui in enumerate(batch):
@@ -371,7 +372,7 @@ class DirectorGate(Step[StageRef]):
             Timer.by_duration(self.config.gate_reminder),
         )
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, DIRECTOR_GATE)
         frozen = _plan(context)
         review = _write_review(context, frozen)
@@ -442,7 +443,7 @@ class ApproveItemsStep(Step[StageRef]):
     def get_step_options(self) -> StepOptions:
         return _bookkeeping().on_execute_failure_proceed_to(RecoveryGate)
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, APPROVING_ITEMS)
         frozen = _plan(context)
         overrides = _tier_overrides(context)
@@ -538,7 +539,7 @@ class ProduceWaveStep(Step[StageRef]):
             ]
         )
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, PRODUCING)
         batch = _batch(context, input)
         for index, hui in enumerate(batch):
@@ -618,7 +619,7 @@ class QaGate(Step[StageRef]):
             Timer.by_duration(self.config.gate_reminder),
         )
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, QA_GATE)
         frozen = _plan(context)
         counts = _recount(context)
@@ -683,7 +684,7 @@ class HarvestStep(Step[StageRef]):
             execute_retry=RetryPolicy(maximum_attempts=1),
         ).on_execute_failure_proceed_to(RecoveryGate)
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, HARVESTING)
         project = Project(input.config_path)
         frozen = _plan(context)
@@ -748,7 +749,7 @@ class AssembleStep(Step[StageRef]):
             execute_retry=RetryPolicy(maximum_attempts=2),
         ).on_execute_failure_proceed_to(RecoveryGate)
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, ASSEMBLING)
         project = Project(input.config_path)
         script = project.pipeline_script("assemble.py")
@@ -808,7 +809,7 @@ class PrintStep(Step[StageRef]):
             execute_retry=RetryPolicy(maximum_attempts=2),
         ).on_execute_failure_proceed_to(RecoveryGate)
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, PRINTING)
         project = Project(input.config_path)
         script = project.pipeline_script("assemble_print.py")
@@ -876,7 +877,7 @@ class QualityStep(Step[StageRef]):
             execute_retry=RetryPolicy(maximum_attempts=2),
         ).on_execute_failure_proceed_to(RecoveryGate)
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, CHECKING)
         current = _manifest(context)
         if current.epub:
@@ -921,7 +922,7 @@ class ProofGate(Step[StageRef]):
             Timer.by_duration(self.config.gate_reminder),
         )
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, PROOF_GATE)
         frozen = _plan(context)
         current = _manifest(context)
@@ -1018,7 +1019,7 @@ class RecoveryGate(Step[StageRef]):
             resume.for_one(), Timer.by_duration(self.config.gate_reminder)
         )
 
-    async def execute(self, context: Context, input: StageRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: StageRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, RECOVERY_GATE)
         recorded = failure.get(context) or StageFailure()
         if not recorded.stage:

@@ -33,6 +33,7 @@ from datetime import timedelta
 from typing import Any
 
 from dex import (
+    AsyncContext,
     Attribute,
     AttributeIndex,
     AttributeMap,
@@ -282,7 +283,7 @@ class Pass1StartStep(Step[VolumeInput]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: VolumeInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeInput) -> StepDecision:  # type: ignore[override]
         stage.set(context, PLANNING)
         project = Project(input.config_path)
         project.require_pass1_support()
@@ -338,7 +339,7 @@ class WaveStep(Step[WaveInput]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: WaveInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: WaveInput) -> StepDecision:  # type: ignore[override]
         stage.set(context, RUNNING)
         pending = _ints(input.pending)
         if not pending:
@@ -382,7 +383,7 @@ class WaveJoinStep(Step[WaveJoinInput]):
     def wait_for(self, context: Context, input: WaveJoinInput) -> Wait:
         return Wait.until(chapter_done.for_n(input.batch))
 
-    async def execute(self, context: Context, input: WaveJoinInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: WaveJoinInput) -> StepDecision:  # type: ignore[override]
         stage.set(context, RUNNING)
         project = Project(input.config_path)
         done, failed, cost, attention = _tally(project, input.book)
@@ -415,7 +416,7 @@ class CombineStep(Step[VolumeRef]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: VolumeRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, COMBINING)
         project = Project(input.config_path)
         chapters = []
@@ -471,7 +472,7 @@ class ReviewGate(Step[VolumeRef]):
             Timer.by_duration(self.config.gate_reminder),
         )
 
-    async def execute(self, context: Context, input: VolumeRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         if context.has_timer_fired():
             note.set(
@@ -498,7 +499,7 @@ class ChapterFailedStep(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         marker = project.chapter_dir(input.book, input.hui) / "FAILED.txt"
         marker.parent.mkdir(parents=True, exist_ok=True)
@@ -530,7 +531,7 @@ class Pass1Step(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _phase_options(self.config)
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         target = project.phase_path(input.book, input.hui, "p1")
         if not target.is_file():
@@ -596,7 +597,7 @@ class DialogueRepairStep(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _phase_options(self.config)
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         target = project.phase_path(input.book, input.hui, "p1_repaired")
         if not target.is_file():
@@ -653,7 +654,7 @@ class Pass2Step(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _phase_options(self.config)
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         target = project.phase_path(input.book, input.hui, "p2")
         if not target.is_file():
@@ -684,7 +685,7 @@ class AuditStep(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _phase_options(self.config)
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         target = project.phase_path(input.book, input.hui, "audit")
         if not target.is_file():
@@ -739,7 +740,7 @@ class RemediateStep(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _phase_options(self.config)
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         target = project.phase_path(input.book, input.hui, "remediated")
         if not target.is_file():
@@ -807,7 +808,7 @@ class FinalizeStep(Step[ChapterRef]):
     def get_step_options(self) -> StepOptions:
         return _phase_options(self.config)
 
-    async def execute(self, context: Context, input: ChapterRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterRef) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         record_path = project.phase_path(input.book, input.hui, "chapter")
         if record_path.is_file():

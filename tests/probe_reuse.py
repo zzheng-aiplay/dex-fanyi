@@ -10,6 +10,7 @@ import time
 from datetime import timedelta
 
 from dex import (
+    AsyncContext,
     Attribute,
     Context,
     Flow,
@@ -28,7 +29,7 @@ val = Attribute("reuseprobe-val", str)
 
 
 class ReadStep(Step[str]):
-    async def execute(self, context: Context, input: str) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: str) -> StepDecision:  # type: ignore[override]
         got = val.get(context)
         val.set(context, f"{got if got is not None else '<unset>'}+run:{input}")
         return graceful_complete(f"start_step_saw={got!r}")

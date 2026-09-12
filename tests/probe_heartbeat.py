@@ -17,6 +17,7 @@ import time
 from datetime import timedelta
 
 from dex import (
+    AsyncContext,
     Attribute,
     Context,
     Flow,
@@ -47,7 +48,7 @@ class SilentStep(Step[str]):
             )
         return options
 
-    async def execute(self, context: Context, input: str) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: str) -> StepDecision:  # type: ignore[override]
         started = time.monotonic()
         print(f"  [step] attempt={context.attempt} sleeping {SLEEP_S}s silently", flush=True)
         await asyncio.sleep(SLEEP_S)

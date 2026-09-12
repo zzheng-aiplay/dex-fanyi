@@ -37,6 +37,7 @@ from datetime import timedelta
 from typing import Any
 
 from dex import (
+    AsyncContext,
     Attribute,
     AttributeIndex,
     AttributeMap,
@@ -180,7 +181,7 @@ class StartStep(Step[VolumeInput]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: VolumeInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeInput) -> StepDecision:  # type: ignore[override]
         stage.set(context, PLANNING)
         project = Project(input.config_path)
         project.require_beatplan_support()
@@ -231,7 +232,7 @@ class WaveStep(Step[WaveInput]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: WaveInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: WaveInput) -> StepDecision:  # type: ignore[override]
         stage.set(context, RUNNING)
         pending = _ints(input.pending)
         if not pending:
@@ -298,7 +299,7 @@ class ChapterStep(Step[ChapterInput]):
             ),
         ).on_execute_failure_proceed_to(ChapterFailedStep)
 
-    async def execute(self, context: Context, input: ChapterInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterInput) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         zh = project.read_source(input.hui)
         prompt = beatplan_prompt(project, input.hui, zh, input.aggressive)
@@ -350,7 +351,7 @@ class ChapterFailedStep(Step[ChapterInput]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: ChapterInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterInput) -> StepDecision:  # type: ignore[override]
         project = Project(input.config_path)
         marker = project.failure_path(input.book, input.hui)
         marker.parent.mkdir(parents=True, exist_ok=True)
@@ -376,7 +377,7 @@ class WaveJoinStep(Step[WaveJoinInput]):
     def wait_for(self, context: Context, input: WaveJoinInput) -> Wait:
         return Wait.until(chapter_done.for_n(input.batch))
 
-    async def execute(self, context: Context, input: WaveJoinInput) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: WaveJoinInput) -> StepDecision:  # type: ignore[override]
         stage.set(context, RUNNING)
         project = Project(input.config_path)
         done, failed, cost = _tally(project, input.book)
@@ -407,7 +408,7 @@ class CombineStep(Step[VolumeRef]):
     def get_step_options(self) -> StepOptions:
         return _waiting_options()
 
-    async def execute(self, context: Context, input: VolumeRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, COMBINING)
         project = Project(input.config_path)
         plans = []
@@ -451,7 +452,7 @@ class HarvestStep(Step[VolumeRef]):
             # the Flow — the chapter plans are already on disk.
         ).on_execute_failure_proceed_to(DirectorGate)
 
-    async def execute(self, context: Context, input: VolumeRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, HARVESTING)
         project = Project(input.config_path)
         script = project.pipeline_script("harvest_beatplan.py")
@@ -491,7 +492,7 @@ class DirectorGate(Step[VolumeRef]):
             Timer.by_duration(self.config.gate_reminder),
         )
 
-    async def execute(self, context: Context, input: VolumeRef) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: VolumeRef) -> StepDecision:  # type: ignore[override]
         stage.set(context, DIRECTOR_GATE)
         project = Project(input.config_path)
         if context.has_timer_fired():

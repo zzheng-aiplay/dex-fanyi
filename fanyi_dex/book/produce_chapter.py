@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from dex import (
+    AsyncContext,
     Attribute,
     AttributeIndex,
     Context,
@@ -106,7 +107,7 @@ class Pass1Step(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(ProduceFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "pass1")
         project = Project(input.config_path)
         # Read once, then hold it in this SubFlow's own durable state: later phases
@@ -191,7 +192,7 @@ class DialogueRepairStep(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(ProduceFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "dialogue-repair")
         project = Project(input.config_path)
         item = loads(item_json.get(context), {})
@@ -262,7 +263,7 @@ class Pass2Step(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(ProduceFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "pass2")
         project = Project(input.config_path)
         item = loads(item_json.get(context), {})
@@ -305,7 +306,7 @@ class AuditStep(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(ProduceFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "audit")
         project = Project(input.config_path)
         item = loads(item_json.get(context), {})
@@ -356,7 +357,7 @@ class RemediateStep(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(ProduceFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "remediate")
         project = Project(input.config_path)
         item = loads(item_json.get(context), {})
@@ -424,7 +425,7 @@ class FinalizeStep(Step[ChapterJob]):
             ),
         ).on_execute_failure_proceed_to(ProduceFailedStep)
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         phase.set(context, "finalize")
         project = Project(input.config_path)
         item = loads(item_json.get(context), {})
@@ -565,7 +566,7 @@ class ProduceFailedStep(Step[ChapterJob]):
             )
         )
 
-    async def execute(self, context: Context, input: ChapterJob) -> StepDecision:  # type: ignore[override]
+    async def execute(self, context: AsyncContext, input: ChapterJob) -> StepDecision:  # type: ignore[override]
         reached = phase.get(context) or "pass1"
         reason = f"hui {input.hui} exhausted its retries in phase '{reached}'"
         phase.set(context, "failed")
