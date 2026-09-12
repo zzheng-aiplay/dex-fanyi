@@ -1161,6 +1161,30 @@ class BookFlow(Flow[StageRef]):
             progress,
         )
 
+    @rpc
+    def approve(self, context: Context, value: Approval) -> RPCResult[bool]:
+        """Deliver a human decision at a gate — the Flow's front door for an approval.
+
+        THE 0.6.0 CONVENTION, and not optional. Until 0.6.0 a Client could publish straight to a
+        Channel (``AsyncClient.publish``), so a human gate needed no handler at all and this Flow had
+        none: the CLI wrote to ``bk-approval`` itself. That method no longer exists, and
+        ``Channel.publish`` requires a Step or RPC Context, so the only remaining way in from outside is
+        an RPC. The Flow now owns its own front door, which is the point — an external actor can no
+        longer mutate durable state with no code here to type or reject it.
+
+        Deliberately NOT transactional. This publishes one message and writes nothing else, so there is
+        no partial commit for a transaction to protect, and a gate that refuses an approval because
+        another write failed would be worse than one that accepts it.
+        """
+        approvals.publish(context, value.gate, value)
+        return RPCResult(True)
+
+    @rpc
+    def resume_at(self, context: Context, stage: str) -> RPCResult[bool]:
+        """Send the volume back to a named stage after a failure. Same door, same reason."""
+        resume.publish(context, stage)
+        return RPCResult(True)
+
     @rpc(load_attribute_maps=(chapters,))
     def snapshot(self, context: Context) -> RPCResult[Snapshot]:
         """One cohesive read model, so a UI or CLI needs exactly one request.

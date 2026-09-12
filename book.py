@@ -319,7 +319,7 @@ async def _decide(app: ClientOnly, args: argparse.Namespace, decision: str) -> i
         actor=args.actor,
     )
     try:
-        await app.client.publish(fid, book_flow.approvals, args.gate, value)
+        await app.client.invoke_rpc(book_flow.BookFlow.approve, fid, value)
     except (FlowNotActiveError, FlowNotFoundError):
         print(f"{fid} is not running")
         return 1
@@ -331,7 +331,7 @@ async def cmd_resume(app: ClientOnly, args: argparse.Namespace) -> int:
     project = Project(args.config)
     fid = flow_id(project, args.book, getattr(args, 'generation', 0))
     try:
-        await app.client.publish(fid, book_flow.resume, args.stage)
+        await app.client.invoke_rpc(book_flow.BookFlow.resume_at, fid, args.stage)
     except (FlowNotActiveError, FlowNotFoundError):
         print(f"{fid} is not running")
         return 1

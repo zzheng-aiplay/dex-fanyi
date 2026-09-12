@@ -997,6 +997,17 @@ class Pass1Flow(Flow[VolumeInput]):
         )
 
     @rpc
+    def mark_reviewed(self, context: Context, note: str) -> RPCResult[bool]:
+        """Signal that the pass-1 review is done. The Flow\u2019s front door for that gate.
+
+        0.6.0 removed ``AsyncClient.publish``, and ``Channel.publish`` needs a Step or RPC Context, so
+        an external signal has to arrive through a handler on the Flow. Before that the CLI published to
+        ``pass1_reviewed`` directly and this Flow exposed no way in.
+        """
+        pass1_reviewed.publish(context, note)
+        return RPCResult(True)
+
+    @rpc
     def status(self, context: Context) -> RPCResult[str]:
         return RPCResult(
             json.dumps(

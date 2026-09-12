@@ -35,6 +35,7 @@ from fanyi_dex.app import ClientOnly
 from fanyi_dex.config import Config
 from fanyi_dex.flow import PLANNING, VolumeInput
 from fanyi_dex.flow import (
+    BeatPlanFlow,
     chapters_done,
     chapters_failed,
     chapters_total,
@@ -154,7 +155,7 @@ async def cmd_reviewed(app: ClientOnly, args: argparse.Namespace) -> int:
     project = Project(args.config)
     fid = beatplan_flow_id(project, args.book)
     try:
-        await app.client.publish(fid, tiers_reviewed, args.note)
+        await app.client.invoke_rpc(BeatPlanFlow.mark_reviewed, fid, args.note)
     except (FlowNotActiveError, FlowNotFoundError):
         print(f"{fid} is not running")
         return 1
@@ -339,7 +340,7 @@ async def cmd_pass1_reviewed(app: ClientOnly, args: argparse.Namespace) -> int:
     project = Project(args.config)
     fid = pass1_flow_id(project, args.book)
     try:
-        await app.client.publish(fid, pass1_flow.pass1_reviewed, args.note)
+        await app.client.invoke_rpc(pass1_flow.Pass1Flow.mark_reviewed, fid, args.note)
     except (FlowNotActiveError, FlowNotFoundError):
         print(f"{fid} is not running")
         return 1
